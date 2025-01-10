@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Splitter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(135deg, #007BFF, #00d4ff);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        main {
+            margin: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #007BFF;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        #results {
+            margin-top: 20px;
+            font-size: 1rem;
+        }
+
+        .owe {
+            color: #d9534f;
+            font-weight: bold;
+        }
+
+        .receive {
+            color: #5cb85c;
+            font-weight: bold;
+        }
+
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        #history {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #history p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Expense Splitter</h1>
+        <p>Effortlessly split and settle shared expenses</p>
+    </header>
+    <main>
+        <div>
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label for="personName">Person's Name</label>
+                    <input type="text" id="personName" placeholder="Enter the name">
+                </div>
+                <div class="form-group">
+                    <label for="amountSpent">Amount Spent (INR)</label>
+                    <input type="number" id="amountSpent" placeholder="Enter the amount in INR">
+                </div>
+                <div>
+                    <button type="button" class="button" onclick="addExpense()">Add Expense</button>
+                    <button type="button" class="button" onclick="calculateSplit()">Calculate Split</button>
+                </div>
+            </form>
+        </div>
+        <div id="history">
+            <h3>History</h3>
+            <div id="historyContent"></div>
+        </div>
+        <div id="results"></div>
+    </main>
+    <footer>
+        <p>Designed with simplicity for managing group expenses</p>
+    </footer>
+
+    <script>
+        const details = {};
+        let totalSpent = 0;
+
+        function addExpense() {
+            const personName = document.getElementById('personName').value.trim();
+            const amountSpent = parseFloat(document.getElementById('amountSpent').value);
+
+            if (!personName || isNaN(amountSpent) || amountSpent <= 0) {
+                alert('Please enter valid details.');
+                return;
+            }
+
+            details[personName] = (details[personName] || 0) + amountSpent;
+            totalSpent += amountSpent;
+
+            const historyContent = document.getElementById('historyContent');
+            historyContent.innerHTML += `<p>${personName} added ₹${amountSpent.toFixed(2)}</p>`;
+
+            document.getElementById('personName').value = '';
+            document.getElementById('amountSpent').value = '';
+            alert(`${personName} added with amount: ₹${amountSpent.toFixed(2)}`);
+        }
+
+        function calculateSplit() {
+            const numPeople = Object.keys(details).length;
+
+            if (numPeople === 0) {
+                alert('No data to calculate. Please add some expenses.');
+                return;
+            }
+
+            const individualShare = totalSpent / numPeople;
+            const result = {};
+
+            for (const person in details) {
+                result[person] = details[person] - individualShare;
+            }
+
+            const resultDiv = document.getElementById('results');
+            resultDiv.innerHTML = `<h3>Total Spent: ₹${totalSpent.toFixed(2)}</h3>`;
+
+            for (const person in result) {
+                const status = result[person] >= 0 ? 'Receives' : 'Owes';
+                const className = result[person] >= 0 ? 'receive' : 'owe';
+                resultDiv.innerHTML += `<p class="${className}">${person}: ${status} ₹${Math.abs(result[person]).toFixed(2)}</p>`;
+            }
+        }
+    </script>
+</body>
+
+</html>
